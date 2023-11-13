@@ -4,7 +4,7 @@ import { api } from "~/utils/api";
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 
 export default function Home() {
-  const hello = api.post.hello.useQuery({ text: "from tRPC" });
+  const { data } = api.post.getAll.useQuery();
 
   const user = useUser();
 
@@ -29,6 +29,7 @@ export default function Home() {
             </button>
           )}
         </div>
+        <div>{data?.map((post) => <div>{post.content}</div>)}</div>
       </main>
     </>
   );
