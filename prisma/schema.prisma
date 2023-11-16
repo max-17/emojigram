@@ -20,7 +20,7 @@ model Post {
   id        Int      @id @default(autoincrement())
   content   String   @db.VarChar(255)
   createdAt DateTime @default(now())
-  autherId  String
+  authorId  String
 
-  @@index([autherId])
+  @@index([authorId])
 }
