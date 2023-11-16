@@ -7,13 +7,14 @@ import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { LoadingPage } from "~/components/loading";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
 
-  console.log(user);
+  // console.log(user);
 
   if (!user) return null;
 
@@ -63,11 +64,26 @@ const PostView = (props: PostWithAuthor) => {
   );
 };
 
-export default function Home() {
-  const user = useUser();
+const Feed = () => {
   const { data, isLoading } = api.post.getAll.useQuery();
-  if (isLoading) return <div>Loading...</div>;
+
+  if (isLoading) return <LoadingPage />;
   if (!data) return <div>Something went wrong</div>;
+
+  return (
+    <>
+      {data.map((post) => (
+        <PostView {...post} />
+      ))}
+    </>
+  );
+};
+
+export default function Home() {
+  // start loading posts
+  api.post.getAll.useQuery();
+
+  const { isSignedIn: userSignedIn } = useUser();
 
   return (
     <>
@@ -77,14 +93,13 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className=" container mx-auto flex justify-center">
-        {user.isSignedIn && (
+        {userSignedIn && (
           <div className="flex h-screen w-full flex-col border-x border-slate-200">
             <div className="border p-4">
               <CreatePostWizard />
             </div>
-            {data.map((post) => (
-              <PostView {...post} />
-            ))}
+
+            <Feed />
 
             {/* <div className="flex content-center">
               <button className="h-10 rounded-full bg-red-400 px-3 text-slate-700">
@@ -94,7 +109,7 @@ export default function Home() {
           </div>
         )}
 
-        {!user.isSignedIn && (
+        {!userSignedIn && (
           <button className=" rounded-full bg-green-400 px-3 text-slate-700">
             <SignInButton />
           </button>
