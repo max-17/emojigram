@@ -3,22 +3,33 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 
 const filterUserForClient = (user: User) => {
   return { id: user.id, imageUrl: user.imageUrl, username: user.username };
 };
 
+const emojiInput = z.object({ content: z.string().emoji().min(1).max(255) });
+
 export const postsRouter = createTRPCRouter({
-  // create: publicProcedure
-  //   .input(z.object({ content: z.string().min(1) }))
-  //   .mutation(async ({ ctx, input }) => {
-  //     return ctx.db.post.create({
-  //       data: {
-  //         content: input.content,
-  //       },
-  //     });
-  //   }),
+  create: privateProcedure
+    .input(emojiInput)
+    .mutation(async ({ ctx, input }) => {
+      const authorId = ctx.session.userId;
+
+      const post = await ctx.db.post.create({
+        data: {
+          authorId,
+          content: input.content,
+        },
+      });
+
+      return post;
+    }),
 
   // getLatest: publicProcedure.query(({ ctx }) => {
   //   return ctx.db.post.findFirst({
@@ -29,6 +40,7 @@ export const postsRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.db.post.findMany({
       take: 100,
+      orderBy: [{ createdAt: "desc" }],
     });
 
     const users = await clerkClient.users.getUserList({

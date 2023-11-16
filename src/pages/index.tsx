@@ -8,11 +8,21 @@ import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { LoadingPage } from "~/components/loading";
+import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
+  const utils = api.useUtils();
+  const { mutate, isLoading: isPosting } = api.post.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      utils.post.getAll.invalidate();
+    },
+  });
+
   const { user } = useUser();
+  const [input, setInput] = useState("");
 
   // console.log(user);
 
@@ -29,9 +39,13 @@ const CreatePostWizard = () => {
       />
       <input
         className=" grow bg-transparent outline-none"
-        placeholder="Type some emojis!"
+        placeholder={isPosting ? "Posting..." : "Type some emojis!"}
         type="text"
+        value={input}
+        disabled={isPosting}
+        onChange={(e) => setInput(e.target.value)}
       />
+      <button onClick={() => mutate({ content: input })}>Post</button>
     </div>
   );
 };
@@ -43,13 +57,15 @@ const PostView = (props: PostWithAuthor) => {
   return (
     <ul>
       <div className="flex gap-3 border-b border-slate-200 p-4" key={post.id}>
-        <Image
-          className=" rounded-full"
-          height={44}
-          width={44}
-          src={author.imageUrl}
-          alt="author image"
-        />
+        <div>
+          <Image
+            className=" rounded-full"
+            height={44}
+            width={44}
+            src={author.imageUrl}
+            alt="author image"
+          />
+        </div>
         <div className="flex flex-col">
           <p>
             {`@${author.username}  · `}
@@ -57,7 +73,7 @@ const PostView = (props: PostWithAuthor) => {
               {`${dayjs(post.createdAt).fromNow()}`}
             </span>
           </p>
-          {post.content}
+          <div className="text-4xl">{post.content}</div>
         </div>
       </div>
     </ul>
@@ -73,7 +89,7 @@ const Feed = () => {
   return (
     <>
       {data.map((post) => (
-        <PostView {...post} />
+        <PostView key={post.post.id} {...post} />
       ))}
     </>
   );
