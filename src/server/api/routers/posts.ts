@@ -22,7 +22,9 @@ const filterUserForClient = (user: User) => {
   return { id: user.id, imageUrl: user.imageUrl, username: user.username };
 };
 
-const emojiInput = z.object({ content: z.string().emoji().min(1).max(255) });
+const emojiInput = z.object({
+  content: z.string().emoji("only emojis are allowed!").min(1).max(255),
+});
 
 export const postsRouter = createTRPCRouter({
   create: privateProcedure

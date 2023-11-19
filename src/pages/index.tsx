@@ -7,8 +7,9 @@ import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { LoadingPage } from "~/components/loading";
+import LoadingSpinner, { LoadingPage } from "~/components/loading";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 dayjs.extend(relativeTime);
 
@@ -17,7 +18,16 @@ const CreatePostWizard = () => {
   const { mutate, isLoading: isPosting } = api.post.create.useMutation({
     onSuccess: () => {
       setInput("");
-     void utils.post.getAll.invalidate();
+      void utils.post.getAll.invalidate();
+    },
+
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content;
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);
+      } else {
+        toast.error("Failed to post! Plase try aain later.");
+      }
     },
   });
 
@@ -44,8 +54,27 @@ const CreatePostWizard = () => {
         value={input}
         disabled={isPosting}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (input !== "") {
+              mutate({ content: input });
+            }
+          }
+        }}
       />
-      <button onClick={() => mutate({ content: input })}>Post</button>
+      {isPosting ? (
+        <div className="flex items-center justify-center">
+          <LoadingSpinner size={20} />
+        </div>
+      ) : (
+        <button
+          disabled={isPosting || input == ""}
+          onClick={() => mutate({ content: input })}
+        >
+          Post
+        </button>
+      )}
     </div>
   );
 };
