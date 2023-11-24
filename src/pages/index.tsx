@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { RouterOutputs, api } from "~/utils/api";
 
-import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import { SignInButton, useUser } from "@clerk/nextjs";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -10,6 +10,7 @@ import LoadingSpinner, { LoadingPage } from "~/components/loading";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { string } from "zod";
 
 dayjs.extend(relativeTime);
 
@@ -23,7 +24,7 @@ const CreatePostWizard = () => {
 
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
-      if (errorMessage && errorMessage[0]) {
+      if (errorMessage?.length && errorMessage[0]) {
         toast.error(errorMessage[0]);
       } else {
         toast.error("Failed to post! Plase try aain later.");

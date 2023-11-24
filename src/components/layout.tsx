@@ -1,4 +1,3 @@
-import { GetServerSideProps } from "next";
 import { PropsWithChildren } from "react";
 
 const PageLayout = (props: PropsWithChildren) => {
