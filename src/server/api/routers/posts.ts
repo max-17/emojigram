@@ -26,7 +26,7 @@ export const postsRouter = createTRPCRouter({
   create: privateProcedure
     .input(emojiInput)
     .mutation(async ({ ctx, input }) => {
-      const authorId = ctx.session.userId;
+      const authorId = ctx.userId;
 
       const rateLimited = await ratelimit.limit(authorId);
 

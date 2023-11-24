@@ -43,11 +43,11 @@ type CreateContextOptions = Record<string, never>;
  */
 export const createTRPCContext = (opts: CreateNextContextOptions) => {
   const { req } = opts;
-  const session = getAuth(req);
+  const { userId } = getAuth(req);
 
   return {
     db,
-    session,
+    userId,
   };
 };
 
@@ -98,13 +98,14 @@ export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 
 const enfoceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.userId) {
+  const userId = ctx.userId;
+  if (!userId) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
 
   return next({
     ctx: {
-      session: ctx.session,
+      userId,
     },
   });
 });

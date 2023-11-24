@@ -39,7 +39,7 @@ const CreatePostWizard = () => {
   if (!user) return null;
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-4 p-4">
       <Image
         className=" rounded-full"
         src={user.imageUrl}
@@ -84,32 +84,30 @@ type PostWithAuthor = RouterOutputs["post"]["getAll"][number];
 const PostView = (props: PostWithAuthor) => {
   const { post, author } = props;
   return (
-    <ul>
-      <div className="flex gap-3 border-b border-slate-200 p-4" key={post.id}>
-        <div>
-          <Image
-            className=" rounded-full"
-            height={44}
-            width={44}
-            src={author.imageUrl}
-            alt="author image"
-          />
-        </div>
-        <div className="flex flex-col">
-          <p>
-            <Link href={`/@${author.username}`}>{`@${author.username} `}</Link>
-            <span className=" font-extralight">
-              {" · "}
-
-              <Link href={`/post/${post.id}`}>{`${dayjs(
-                post.createdAt,
-              ).fromNow()}`}</Link>
-            </span>
-          </p>
-          <div className="text-4xl">{post.content}</div>
-        </div>
+    <div className="flex gap-3 border border-slate-200 p-4" key={post.id}>
+      <div>
+        <Image
+          className=" rounded-full"
+          height={44}
+          width={44}
+          src={author.imageUrl}
+          alt="author image"
+        />
       </div>
-    </ul>
+      <div className="flex flex-col">
+        <p>
+          <Link href={`@${author.username} `}> {`@${author.username} `}</Link>
+          <span className=" font-extralight">
+            {" · "}
+
+            <Link href={`/post/${post.id}`}>{`${dayjs(
+              post.createdAt,
+            ).fromNow()}`}</Link>
+          </span>
+        </p>
+        <div className="text-4xl">{post.content}</div>
+      </div>
+    </div>
   );
 };
 
@@ -136,29 +134,14 @@ export default function Home() {
 
   return (
     <>
-      <main className=" container mx-auto flex justify-center">
-        {userSignedIn && (
-          <div className="flex h-screen w-full flex-col border-x border-slate-200">
-            <div className="border p-4">
-              <CreatePostWizard />
-            </div>
+      {userSignedIn && <CreatePostWizard />}
+      <Feed />
 
-            <Feed />
-
-            {/* <div className="flex content-center">
-              <button className="h-10 rounded-full bg-red-400 px-3 text-slate-700">
-                <SignOutButton />
-              </button>
-            </div> */}
-          </div>
-        )}
-
-        {!userSignedIn && (
-          <button className=" rounded-full bg-green-400 px-3 text-slate-700">
-            <SignInButton />
-          </button>
-        )}
-      </main>
+      {!userSignedIn && (
+        <button className=" rounded-full bg-green-400 px-3 text-slate-700">
+          <SignInButton />
+        </button>
+      )}
     </>
   );
 }

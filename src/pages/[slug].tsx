@@ -1,8 +1,24 @@
 import { type NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps } from "next/types";
 
 import Head from "next/head";
 
-const ProfilePage: NextPage = () => {
+import { createServerSideHelpers } from "@trpc/react-query/server";
+import { appRouter } from "~/server/api/root";
+import superjson from "superjson";
+import { db } from "~/server/db";
+
+import { api } from "~/utils/api";
+
+const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
+  console.log("username", username);
+
+  const { data } = api.profile.getUserByUserName.useQuery({
+    username,
+  });
+  console.log("data", data);
+
+  if (!data) return <div>404</div>;
   return (
     <>
       <Head>
@@ -11,10 +27,42 @@ const ProfilePage: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className=" container mx-auto flex justify-center">
-        <div>profile page</div>
+        <div>{data.username}</div>
       </main>
     </>
   );
 };
 
 export default ProfilePage;
+
+//prefetch and dehydrate user data on server side
+export const getStaticProps: GetStaticProps = async (context) => {
+  const helpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: { db, userId: null },
+    transformer: superjson, // optional - adds superjson serialization
+  });
+  const slug = context.params?.slug;
+
+  if (typeof slug !== "string") throw new Error("no snug");
+
+  const username = slug.replace("@", "");
+
+  // prefetch
+  await helpers.profile.getUserByUserName.prefetch({
+    username,
+  });
+  return {
+    props: {
+      trpcState: helpers.dehydrate(),
+      username,
+    },
+  };
+};
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
+};
