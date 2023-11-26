@@ -3,15 +3,17 @@ import Head from "next/head";
 
 import type { GetStaticPaths, GetStaticProps } from "next/types";
 import { api } from "~/utils/api";
-import Image from "next/image";
+
 import { LoadingPage } from "~/components/loading";
 import { generateSSGHelper } from "~/server/helpers/SSGHelper";
 import { PostView } from "~/components/PostView";
 
 const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
-  const { data } = api.post.getById.useQuery({
+  const { data, isLoading } = api.post.getById.useQuery({
     id,
   });
+
+  if (isLoading) return <LoadingPage />;
 
   if (!data) return <div>404</div>;
 
