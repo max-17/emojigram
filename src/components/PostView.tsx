@@ -22,7 +22,7 @@ export const PostView = (props: PostWithAuthor) => {
       </div>
       <div className="flex flex-col">
         <p>
-          <Link href={`@${author.username} `}> {`@${author.username} `}</Link>
+          <Link href={`/@${author.username} `}> {`@${author.username} `}</Link>
           <span className=" font-extralight">
             {" · "}
 

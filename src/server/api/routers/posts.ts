@@ -82,6 +82,20 @@ export const postsRouter = createTRPCRouter({
     return addUserToPosts(posts);
   }),
 
+  getById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const post = await ctx.db.post.findUnique({
+        where: {
+          id: parseInt(input.id),
+        },
+      });
+
+      if (post) return (await addUserToPosts([post]))[0];
+      else
+        throw new TRPCError({ code: "NOT_FOUND", message: "Post not found!" });
+    }),
+
   getPostByUserId: publicProcedure
     .input(userIdInput)
     .query(async ({ ctx, input }) =>
