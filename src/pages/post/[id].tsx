@@ -7,11 +7,12 @@ import { api } from "~/utils/api";
 import { LoadingPage } from "~/components/loading";
 import { generateSSGHelper } from "~/server/helpers/SSGHelper";
 import { PostView } from "~/components/PostView";
+import PageNotFound from "../404";
 
-import { useRouter } from "next/router";
+// import { useRouter } from "next/router";
 
 const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
-  const router = useRouter();
+  // const router = useRouter();
   const { data, isLoading } = api.post.getById.useQuery({
     id,
   });
@@ -19,7 +20,7 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
   if (isLoading) return <LoadingPage />;
 
   if (!data) {
-    return void router.push("/PageNotFound");
+    return <PageNotFound />;
   }
   return (
     <>
@@ -41,7 +42,10 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   if (typeof id !== "string") throw new Error("no ID");
 
-  // console.log("**************************************", typeof id);
+  if (isNaN(parseInt(id)))
+    return {
+      notFound: true,
+    };
 
   await generateSSGHelper().post.getById.prefetch({ id });
 

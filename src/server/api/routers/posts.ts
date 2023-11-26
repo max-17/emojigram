@@ -92,8 +92,6 @@ export const postsRouter = createTRPCRouter({
       });
 
       if (post) return (await addUserToPosts([post]))[0];
-      else
-        throw new TRPCError({ code: "NOT_FOUND", message: "Post not found!" });
     }),
 
   getPostByUserId: publicProcedure
