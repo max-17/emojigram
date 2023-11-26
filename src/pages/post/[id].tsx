@@ -8,15 +8,19 @@ import { LoadingPage } from "~/components/loading";
 import { generateSSGHelper } from "~/server/helpers/SSGHelper";
 import { PostView } from "~/components/PostView";
 
+import { useRouter } from "next/router";
+
 const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
+  const router = useRouter();
   const { data, isLoading } = api.post.getById.useQuery({
     id,
   });
 
   if (isLoading) return <LoadingPage />;
 
-  if (!data) return <div>404</div>;
-
+  if (!data) {
+    return void router.push("/PageNotFound");
+  }
   return (
     <>
       <Head>
